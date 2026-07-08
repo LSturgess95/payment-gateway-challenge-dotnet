@@ -1,3 +1,9 @@
+using Microsoft.AspNetCore.Mvc;
+
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
+
+using PaymentGateway.Api.Clients;
 using PaymentGateway.Api.Repositories;
 using PaymentGateway.Api.Services;
 
@@ -10,8 +16,27 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<PaymentsRepository>();
-builder.Services.AddSingleton<PaymentsService>();
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService(builder.Environment.ApplicationName))
+    .WithLogging(logging => logging.AddConsoleExporter());
+
+// Config
+builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
+builder.Services.Configure<JsonOptions>(o =>
+{
+    o.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+});
+
+// DI
+builder.Services.AddSingleton<IPaymentRepository, PaymentRepository>();
+builder.Services.AddSingleton<IPaymentService, PaymentService>();
+
+// Clients
+builder.Services.AddHttpClient<IBankClient, BankClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["BankClient:BaseUrl"]!);
+});
 
 var app = builder.Build();
 
