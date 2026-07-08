@@ -27,7 +27,7 @@ namespace PaymentGateway.Api.Extensions
             {
                 Status = PaymentStatus.Rejected,
                 RejectionReasons = errors.ToList(),
-                CardNumberLastFour = string.IsNullOrWhiteSpace(paymentRequest?.CardNumber) ? null : paymentRequest.CardNumber[^Math.Min(4, paymentRequest.CardNumber.Length)..],
+                CardNumberLastFour = string.IsNullOrWhiteSpace(paymentRequest?.CardNumber) ? "" : paymentRequest.CardNumber[^Math.Min(4, paymentRequest.CardNumber.Length)..],
                 ExpiryMonth = paymentRequest?.ExpiryMonth ?? 0,
                 ExpiryYear = paymentRequest?.ExpiryYear ?? 0,
                 CurrencyCode = paymentRequest?.CurrencyCode,
@@ -41,7 +41,7 @@ namespace PaymentGateway.Api.Extensions
             {
                 Id = payment?.Id,
                 Status = payment?.Status,
-                CardNumberLastFour = string.IsNullOrWhiteSpace(payment?.CardNumber) ? null : payment.CardNumber[^Math.Min(4, payment.CardNumber.Length)..],
+                CardNumberLastFour = string.IsNullOrWhiteSpace(payment?.CardNumber) ? "" : payment.CardNumber[^Math.Min(4, payment.CardNumber.Length)..],
                 ExpiryMonth = payment?.ExpiryMonth,
                 ExpiryYear = payment?.ExpiryYear,
                 CurrencyCode = payment?.CurrencyCode,
@@ -54,7 +54,7 @@ namespace PaymentGateway.Api.Extensions
             return new BankPaymentRequest
             {
                 CardNumber = payment.CardNumber!,
-                ExpiryDate = $"{payment.ExpiryMonth}/{payment.ExpiryYear}",
+                ExpiryDate = $"{payment.ExpiryMonth:00}/{payment.ExpiryYear}",
                 Currency = payment.CurrencyCode!,
                 Amount = payment.Amount,
                 Cvv = payment.Cvv!,
