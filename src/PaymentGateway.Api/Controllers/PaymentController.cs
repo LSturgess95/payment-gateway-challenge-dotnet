@@ -5,7 +5,7 @@ using PaymentGateway.Api.Services;
 using PaymentGateway.Api.Extensions;
 using PaymentGateway.Api.Contracts.Requests;
 using PaymentGateway.Api.Domain;
-using System.ComponentModel.DataAnnotations;
+using PaymentGateway.Api.Clients.Exceptions;
 
 namespace PaymentGateway.Api.Controllers;
 
@@ -13,10 +13,12 @@ namespace PaymentGateway.Api.Controllers;
 [ApiController]
 public class PaymentController : Controller
 {
+    private readonly ILogger<PaymentController> _logger;
     private readonly IPaymentService _paymentsService;
 
-    public PaymentController(IPaymentService paymentsService)
+    public PaymentController(ILogger<PaymentController> logger, IPaymentService paymentsService)
     {
+        _logger = logger;
         _paymentsService = paymentsService;
     }
 
@@ -57,10 +59,30 @@ public class PaymentController : Controller
         {
             return Problem(
                 title: "Bank unavailable",
-                detail: "The payment could not be processed because the acquiring bank is currently unavailable",
+                detail: "The payment could not be processed because the acquiring bank is currently unavailable.",
                 statusCode: StatusCodes.Status502BadGateway
             );
         }
-
+        catch (BankMalformedRequestException)
+        {
+            return BadRequest(request.ToRejectedResponse(new[] { "The payment could not be processed because the acquiring bank rejected it." }));
+        }
+        catch (PaymentSaveFailureException)
+        {
+            return Problem(
+                title: "Downstream system unavailable",
+                detail: "The payment could not be processed because the downstream data source is currently unavailable.",
+                statusCode: StatusCodes.Status502BadGateway
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unknown error has occured.");
+            return Problem(
+                title: "Unknown error occured",
+                detail: "An unknown error has occured.",
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
     }
 }

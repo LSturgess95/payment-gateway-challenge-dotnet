@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging.Abstractions;
+
 using Moq;
 
 using PaymentGateway.Api.Clients;
+using PaymentGateway.Api.Clients.Exceptions;
 using PaymentGateway.Api.Contracts.Requests;
 using PaymentGateway.Api.Contracts.Responses;
 using PaymentGateway.Api.Domain;
@@ -18,6 +20,7 @@ public class PaymentServiceTests
 
     public PaymentServiceTests()
     {
+        _repository.Setup(r => r.Save(It.IsAny<Payment>())).Returns(true);
         _sut = new PaymentService(NullLogger<PaymentService>.Instance, _repository.Object, _bankClient.Object);
     }
 
@@ -37,7 +40,6 @@ public class PaymentServiceTests
         var result = _sut.Get(Guid.Empty);
 
         Assert.Null(result);
-        _repository.Verify(r => r.Get(It.IsAny<Guid>()), Times.Never);
     }
 
     [Fact]

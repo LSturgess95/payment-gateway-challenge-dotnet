@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace PaymentGateway.Api.Domain
+namespace PaymentGateway.Api.Clients.Exceptions
 {
     public class BankUnavailableException : Exception
     {

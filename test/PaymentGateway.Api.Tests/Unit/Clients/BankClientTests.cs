@@ -2,12 +2,13 @@ using System.Net;
 using System.Net.Http.Json;
 
 using Microsoft.Extensions.Logging.Abstractions;
+
 using Moq;
 using Moq.Protected;
 
 using PaymentGateway.Api.Clients;
+using PaymentGateway.Api.Clients.Exceptions;
 using PaymentGateway.Api.Contracts.Requests;
-using PaymentGateway.Api.Domain;
 
 namespace PaymentGateway.Api.Tests.Unit.Clients;
 
@@ -62,6 +63,6 @@ public class BankClientTests
     {
         var sut = CreateSut(HttpStatusCode.BadRequest, new { error_message = "Not all required properties were sent in the request" });
 
-        await Assert.ThrowsAsync<BankUnavailableException>(() => sut.ProcessPaymentAsync(ValidRequest()));
+        await Assert.ThrowsAsync<BankMalformedRequestException>(() => sut.ProcessPaymentAsync(ValidRequest()));
     }
 }

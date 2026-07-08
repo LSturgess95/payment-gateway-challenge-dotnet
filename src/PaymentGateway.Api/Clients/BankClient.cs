@@ -1,6 +1,9 @@
-﻿using PaymentGateway.Api.Contracts.Requests;
+﻿using System.Net;
+
+using PaymentGateway.Api.Contracts.Requests;
 using PaymentGateway.Api.Contracts.Responses;
-using PaymentGateway.Api.Domain;
+using PaymentGateway.Api.Extensions;
+using PaymentGateway.Api.Clients.Exceptions;
 
 namespace PaymentGateway.Api.Clients
 {
@@ -22,11 +25,25 @@ namespace PaymentGateway.Api.Clients
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Bank simulator returned {StatusCode}", response.StatusCode);
-                throw new BankUnavailableException(response.StatusCode);
+                _logger.BankProcessPaymentKnownFailure(response.StatusCode);
+
+                if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+                {
+                    throw new BankUnavailableException(response.StatusCode);
+                }
+                else if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    throw new BankMalformedRequestException(response.StatusCode);
+                }
+                else
+                {
+                    _logger.BankProcessPaymentUnknownFailure(response.StatusCode, await response.Content.ReadAsStringAsync());
+                    throw new Exception($"Bank returned an unknown error response {response.StatusCode}");
+                }
             }
 
-            return (await response.Content.ReadFromJsonAsync<BankPaymentResponse>())!;
+            var responseContent = await response.Content.ReadFromJsonAsync<BankPaymentResponse>();
+            return responseContent is null ? throw new BankEmptyResponseContentException() : responseContent;
         }
     }
 }

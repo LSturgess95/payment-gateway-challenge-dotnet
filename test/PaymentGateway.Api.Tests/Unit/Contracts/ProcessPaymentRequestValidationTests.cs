@@ -59,6 +59,17 @@ public class ProcessPaymentRequestValidationTests
     }
 
     [Fact]
+    public void InvalidAmountFormat_ProducesRangeError()
+    {
+        var request = ValidRequest();
+        request.Amount = -13;
+
+        var results = Validate(request);
+
+        Assert.Contains(results, r => r.MemberNames.Contains(nameof(ProcessPaymentRequest.Amount)));
+    }
+
+    [Fact]
     public void ExpiryMonthOutOfRange_ProducesRangeError()
     {
         var request = ValidRequest();

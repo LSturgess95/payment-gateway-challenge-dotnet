@@ -1,6 +1,5 @@
 ﻿using PaymentGateway.Api.Extensions;
 using PaymentGateway.Api.Contracts.Requests;
-using PaymentGateway.Api.Contracts.Responses;
 using PaymentGateway.Api.Repositories;
 using PaymentGateway.Api.Domain;
 using PaymentGateway.Api.Clients;
@@ -20,17 +19,9 @@ namespace PaymentGateway.Api.Services
             _bankClient = bankClient;
         }
 
-        public Payment Get(Guid id)
+        public Payment? Get(Guid id)
         {
-            if (id == default)
-            {
-                _logger.LogWarning("id value has not been set");
-                return null!;
-            }
-
-            var payment = _paymentsRepository.Get(id);
-
-            return payment!;
+            return _paymentsRepository.Get(id);
         }
 
         public async Task<Payment> ProcessPaymentAsync(ProcessPaymentRequest paymentRequest)
@@ -48,7 +39,10 @@ namespace PaymentGateway.Api.Services
                 payment.Status = PaymentStatus.Declined;
             }
 
-            _paymentsRepository.Save(payment);
+            if(!_paymentsRepository.Save(payment))
+            {
+                throw new PaymentSaveFailureException();
+            }
 
             return payment;
         }

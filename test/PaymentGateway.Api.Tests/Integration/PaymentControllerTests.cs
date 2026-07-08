@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using PaymentGateway.Api.Clients;
+using PaymentGateway.Api.Clients.Exceptions;
 using PaymentGateway.Api.Contracts.Requests;
 using PaymentGateway.Api.Contracts.Responses;
 using PaymentGateway.Api.Domain;

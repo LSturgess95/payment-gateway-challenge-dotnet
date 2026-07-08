@@ -4,7 +4,7 @@ namespace PaymentGateway.Api.Contracts.Requests;
 
 public class ProcessPaymentRequest : IValidatableObject
 {
-    private static readonly string[] AllowedCurrencies = { "USD", "GBP", "EUR" };
+    private static readonly string[] AllowedCurrencies = ["USD", "GBP", "EUR"];
 
     [Required]
     [RegularExpression(@"\d{14,19}", ErrorMessage = "Card number must be 14-19 digits.")]
@@ -23,6 +23,7 @@ public class ProcessPaymentRequest : IValidatableObject
     public string? CurrencyCode { get; set; }
 
     [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "Amount must be a positive value.")]
     public int? Amount { get; set; }
 
     [Required]
