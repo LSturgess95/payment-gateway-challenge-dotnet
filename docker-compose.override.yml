@@ -1,0 +1,10 @@
+services:
+  payment_gateway_api:
+    build:
+      target: build          # stop at the SDK stage, skip the publish/runtime stage
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./src/PaymentGateway.Api:/src/src/PaymentGateway.Api
+    working_dir: /src/src/PaymentGateway.Api
+    entrypoint: ["dotnet", "watch", "run", "--no-launch-profile"]
