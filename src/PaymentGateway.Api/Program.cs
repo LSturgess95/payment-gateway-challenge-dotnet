@@ -36,7 +36,7 @@ builder.Services.AddSingleton<IPaymentService, PaymentService>();
 builder.Services.AddHttpClient<IBankClient, BankClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["BankClient:BaseUrl"]!);
-});
+}).AddStandardResilienceHandler();
 
 var app = builder.Build();
 
